@@ -6,7 +6,7 @@ package im.hdy.entity;
  */
 public class Mobile {
 
-    private Integer id;
+    private String id;
     private String mobileNumber;
     private String password;
     private Message message;
@@ -15,7 +15,7 @@ public class Mobile {
     public Mobile() {
     }
 
-    public Mobile(Integer id, String mobileNumber, String password, String publicKey, Message message, ContactMessage contactMessage, String privateKey) {
+    public Mobile(String id, String mobileNumber, String password, String publicKey, Message message, ContactMessage contactMessage, String privateKey) {
         this.id = id;
         this.mobileNumber = mobileNumber;
         this.password = password;
@@ -24,11 +24,11 @@ public class Mobile {
     }
 
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 

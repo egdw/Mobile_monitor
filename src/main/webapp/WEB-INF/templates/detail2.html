@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title th:text="'欢迎您:'+${session.currentUser.getMobileNumber()}">我的生活</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
+    <link rel="shortcut icon" href="/favicon.ico"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css"/>
+</head>
+<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+<body>
+
+<div class="page-group">
+    <!-- 你的html代码 -->
+    <div class="page">
+        <header class="bar bar-nav">
+            <h1 class="title" th:text="'欢迎您,'+${session.currentUser.getMobileNumber()}">我的生活</h1>
+        </header>
+        <nav class="bar bar-tab">
+            <a class="tab-item" href="/">
+                <span class="icon icon-message"></span>
+                <span class="tab-label">短信</span>
+            </a>
+            <a class="tab-item external active" href="/contact">
+                <span class="icon icon-phone"></span>
+                <span class="tab-label">通话</span>
+            </a>
+        </nav>
+        <div class="content">
+            <!-- 这里是页面内容区 -->
+            <div class="page-index" th:each="contact,contactStat : ${#httpServletRequest.getAttribute('contacts')}">
+                <div class="card">
+                    <div valign="bottom" class="card-header color-white no-border"
+                         th:text="${contact.phoneNumber} +' '+${contact.name}">旅途的山
+                    </div>
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <p class="color-gray" th:text="${contact.date}">发表于 2015/01/15</p>
+                            <p th:text="'通话时长'+${contact.duration}+'分钟'">此处是内容...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+
+</html>

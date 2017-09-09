@@ -37,17 +37,31 @@ public class RegisterController {
             if (password.length() < 8) {
                 return JSON.toJSONString(new Reply(500, "密码太短!"));
             } else {
-                //说明一切准备就绪
-                String[] pairs = RsaUtils.createKeyPairs();
+                Mobile old = reposity.findMobileByMobileNumber(phoneNum);
+                if (old != null) {
+                    //说明不是新用户
+                    String oldPassword = old.getPassword();
+                    String newPassword = MD5Utils.MD5(phoneNum + Constants.SAILT + password);
+                    if (newPassword.equals(oldPassword)) {
+                        //说明密码相同
+                        return JSON.toJSONString(new Reply(200, "登录成功~"));
+                    }else{
+                        return JSON.toJSONString(new Reply(500, "密码错误~"));
+                    }
+                }
+                //说明一是新用户
                 Mobile mobile = new Mobile();
                 mobile.setMobileNumber(phoneNum);
                 mobile.setPassword(MD5Utils.MD5(phoneNum + Constants.SAILT + password));
                 Mobile save = reposity.save(mobile);
-                System.out.println(save);
+                if (save != null) {
+                    //说明注册成功!
+                    return JSON.toJSONString(new Reply(200, "已为您注册并登录成功~"));
+                }
+                return JSON.toJSONString(new Reply(500, "注册失败"));
             }
         } else {
             return JSON.toJSONString(new Reply(500, "手机号码格式错误"));
         }
-        return phoneNum;
     }
 }

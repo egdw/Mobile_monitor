@@ -1,35 +1,23 @@
-package com.test;
+package im.hdy.utils;
 
-import im.hdy.utils.MD5Utils;
-import org.junit.Test;
-
-import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 /**
- * Created by hdy on 2017/9/8.
+ * Created by hdy on 2017/9/9.
  */
-public class AESTest {
 
-    @Test
-    public void test() {
-        //纯英文短信160个字母，但是换成汉字就只有70个汉字合140字节。因为有20字节要用来标记这是中文短信。
-        String content = "";
-        String password = MD5Utils.MD5("hzkjzyjsxy");
-        // 加密
-        System.out.println("加密前：" + content);
-        String s = encrypt(content, password);
-        System.out.println("加密后："+s);
-        // 解密
-
-        String s1 = decrypt(s, password);
-        System.out.println("解密后：" +s1);
-
-    }
+public class AESUtils {
     public static String encrypt(String bef_aes, String password) {
         byte[] byteContent = null;
         try {
@@ -120,5 +108,4 @@ public class AESTest {
             throw new RuntimeException("初始化密钥出现异常");
         }
     }
-
 }

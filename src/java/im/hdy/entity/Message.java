@@ -9,12 +9,12 @@ import java.util.LinkedList;
  */
 public class Message {
     private String id;
-    private LinkedList<Message> messages;
+    private LinkedList<MessageDetail> messages;
 
     public Message() {
     }
 
-    public Message(String id, LinkedList<Message> messages) {
+    public Message(String id, LinkedList<MessageDetail> messages) {
         this.id = id;
         this.messages = messages;
     }
@@ -27,11 +27,11 @@ public class Message {
         this.id = id;
     }
 
-    public LinkedList<Message> getMessages() {
+    public LinkedList<MessageDetail> getMessages() {
         return messages;
     }
 
-    public void setMessages(LinkedList<Message> messages) {
+    public void setMessages(LinkedList<MessageDetail> messages) {
         this.messages = messages;
     }
 
