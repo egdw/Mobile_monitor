@@ -6,7 +6,6 @@ import im.hdy.entity.Reply;
 import im.hdy.reposity.MobileReposity;
 import im.hdy.utils.Constants;
 import im.hdy.utils.MD5Utils;
-import im.hdy.utils.RsaUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,10 +37,10 @@ public class RegisterController {
                 return JSON.toJSONString(new Reply(500, "密码太短!"));
             } else {
                 Mobile old = reposity.findMobileByMobileNumber(phoneNum);
+                String newPassword = MD5Utils.MD5(phoneNum.trim() + Constants.SAILT + password.trim());
                 if (old != null) {
                     //说明不是新用户
                     String oldPassword = old.getPassword();
-                    String newPassword = MD5Utils.MD5(phoneNum + Constants.SAILT + password);
                     if (newPassword.equals(oldPassword)) {
                         //说明密码相同
                         return JSON.toJSONString(new Reply(200, "登录成功~"));
@@ -52,7 +51,10 @@ public class RegisterController {
                 //说明一是新用户
                 Mobile mobile = new Mobile();
                 mobile.setMobileNumber(phoneNum);
-                mobile.setPassword(MD5Utils.MD5(phoneNum + Constants.SAILT + password));
+                System.out.println(phoneNum);
+                System.out.println(password);
+                System.out.println(newPassword);
+                mobile.setPassword(newPassword);
                 Mobile save = reposity.save(mobile);
                 if (save != null) {
                     //说明注册成功!

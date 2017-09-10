@@ -86,6 +86,7 @@
             success: function (data) {
                 if(data.code == 200){
                     swal("Good!", "登录成功了~", "success");
+                    window.location.href="/mobile/messages";
                 }else{
                     swal("OMG!", data.message, "error");
                 }

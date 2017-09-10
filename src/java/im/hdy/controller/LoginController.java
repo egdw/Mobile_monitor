@@ -30,25 +30,25 @@ public class LoginController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public String login(@RequestParam(required = true) String username, @RequestParam(required = true) String password, @RequestParam(required = true) boolean remberMe, HttpSession session, HttpServletResponse response) {
-        System.out.println(username);
-        System.out.println(password);
-        System.out.println(remberMe);
         Mobile mobile = reposity.findMobileByMobileNumber(username);
-        System.out.println(mobile);
         if (mobile != null) {
-            System.out.println(MD5Utils.MD5(username + Constants.SAILT + password));
-            boolean equals = mobile.getPassword().equals(MD5Utils.MD5(username + Constants.SAILT + password));
-            equals = true;
+            System.out.println(username);
+            System.out.println(password);
+            String md5 = MD5Utils.MD5(username + Constants.SAILT + password);
+            System.out.println(md5);
+            boolean equals = mobile.getPassword().equals(md5);
             if (equals) {
                 session.setAttribute("currentUser", mobile);
-                Cookie cookie = new Cookie("remberMe", MD5Utils.MD5(username + Constants.SAILT + password));
-                cookie.setMaxAge(60 * 60 * 24 * 5);// 设置为五天
-                cookie.setPath("/");
-                response.addCookie(cookie);
-                Cookie cookie2 = new Cookie("remberMeU", username);
-                cookie2.setMaxAge(60 * 60 * 24 * 5);// 设置为五天
-                cookie2.setPath("/");
-                response.addCookie(cookie2);
+                if(remberMe){
+                    Cookie cookie = new Cookie("remberMe",md5);
+                    cookie.setMaxAge(60 * 60 * 24 * 5);// 设置为五天
+                    cookie.setPath("/");
+                    response.addCookie(cookie);
+                    Cookie cookie2 = new Cookie("remberMeU", username);
+                    cookie2.setMaxAge(60 * 60 * 24 * 5);// 设置为五天
+                    cookie2.setPath("/");
+                    response.addCookie(cookie2);
+                }
                 return JSON.toJSONString(new Reply(200, "登录成功!"));
             } else {
                 return JSON.toJSONString(new Reply(500, "手机不存在或者密码错误!"));

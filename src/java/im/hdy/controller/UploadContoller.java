@@ -5,8 +5,6 @@ import im.hdy.entity.ContactMessage;
 import im.hdy.entity.Message;
 import im.hdy.entity.Mobile;
 import im.hdy.entity.Reply;
-import im.hdy.reposity.ContactMessageReposity;
-import im.hdy.reposity.MessageReposity;
 import im.hdy.reposity.MobileReposity;
 import im.hdy.utils.Constants;
 import im.hdy.utils.MD5Utils;
@@ -25,27 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class UploadContoller {
 
     @Autowired
-    private MessageReposity messageReposity;
-    @Autowired
     private MobileReposity mobileReposity;
-    @Autowired
-    private ContactMessageReposity contactMessageReposity;
-
-    /**
-     * 每次都是重新上传
-     * - - 不写太复杂了.反正没几个人用- -
-     */
-    @RequestMapping(value = "/message", method = RequestMethod.POST)
-    public void uploadMessage(@RequestParam(required = true) String json, @RequestParam(required = true) String username, @RequestParam(required = true) String password) {
-        Message message = JSON.parseObject(json, Message.class);
-        System.out.println(message);
-    }
-
-    @RequestMapping(value = "/contact", method = RequestMethod.POST)
-    public void uploadContact(@RequestParam(required = true) String json, @RequestParam(required = true) String username, @RequestParam(required = true) String password) {
-        ContactMessage contactMessage = JSON.parseObject(json, ContactMessage.class);
-        System.out.println(contactMessage);
-    }
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
@@ -55,7 +33,7 @@ public class UploadContoller {
         if (old != null) {
             //说明不是新用户
             String oldPassword = old.getPassword();
-            String newPassword = MD5Utils.MD5(username + Constants.SAILT + password);
+            String newPassword = MD5Utils.MD5(username.trim() + Constants.SAILT + password.trim());
             if (newPassword.equals(oldPassword)) {
                 //说明密码相同
                 Mobile mobile = JSON.parseObject(json, Mobile.class);

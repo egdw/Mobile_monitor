@@ -25,13 +25,8 @@ public class ViewController {
     @Autowired
     private MobileReposity reposity;
 
-    public ViewController() {
-        logger.info("控制器已创建");
-    }
-
-
     @RequestMapping(method = RequestMethod.GET)
-    public String getCustomer(HttpServletRequest request, HttpSession session) {
+    public String index(HttpServletRequest request, HttpSession session){
         Cookie[] cookies =
                 request.getCookies();
         if (session.getAttribute("currentUser") != null) {
@@ -39,6 +34,7 @@ public class ViewController {
             Mobile mobile = (Mobile) session.getAttribute("currentUser");
             Mobile number = reposity.findMobileByMobileNumber(mobile.getMobileNumber());
             request.setAttribute("messages", number.getMessage().getMessages());
+            request.setAttribute("contacts", number.getContactMessage().getMessages());
             return "detail";
         }
         if (cookies != null) {
@@ -56,10 +52,52 @@ public class ViewController {
                 Mobile number = reposity.findMobileByMobileNumber(remberUser);
                 if (number != null) {
                     boolean equals = number.getPassword().equals(remberMe);
-                    equals = true;
                     if (equals) {
                         //说明当前的cookie可用而且密码账户都是正确的
                         request.setAttribute("messages", number.getMessage().getMessages());
+                        request.setAttribute("contacts", number.getContactMessage().getMessages());
+                        session.setAttribute("currentUser", number);
+                        return "detail";
+                    }
+
+                }
+            }
+        }
+        return "index";
+    }
+
+
+    @RequestMapping(value = "/messages", method = RequestMethod.GET)
+    public String getCustomer(HttpServletRequest request, HttpSession session) {
+        Cookie[] cookies =
+                request.getCookies();
+        if (session.getAttribute("currentUser") != null) {
+            //说明是已经登录的用户了
+            Mobile mobile = (Mobile) session.getAttribute("currentUser");
+            Mobile number = reposity.findMobileByMobileNumber(mobile.getMobileNumber());
+            request.setAttribute("messages", number.getMessage().getMessages());
+            request.setAttribute("contacts", number.getContactMessage().getMessages());
+            return "detail";
+        }
+        if (cookies != null) {
+            //说明有cookie
+            String remberMe = null;
+            String remberUser = null;
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("remberMe")) {
+                    remberMe = cookie.getValue();
+                } else if (cookie.getName().equals("remberMeU")) {
+                    remberUser = cookie.getValue();
+                }
+            }
+            if (remberMe != null && remberUser != null) {
+                Mobile number = reposity.findMobileByMobileNumber(remberUser);
+                if (number != null) {
+                    boolean equals = number.getPassword().equals(remberMe);
+                    if (equals) {
+                        //说明当前的cookie可用而且密码账户都是正确的
+                        request.setAttribute("messages", number.getMessage().getMessages());
+                        request.setAttribute("contacts", number.getContactMessage().getMessages());
                         session.setAttribute("currentUser", number);
                         return "detail";
                     }
@@ -78,6 +116,7 @@ public class ViewController {
             //说明是已经登录的用户了
             Mobile mobile = (Mobile) session.getAttribute("currentUser");
             Mobile number = reposity.findMobileByMobileNumber(mobile.getMobileNumber());
+            request.setAttribute("messages", number.getMessage().getMessages());
             request.setAttribute("contacts", number.getContactMessage().getMessages());
             return "detail2";
         }
@@ -96,12 +135,12 @@ public class ViewController {
                 Mobile number = reposity.findMobileByMobileNumber(remberUser);
                 if (number != null) {
                     boolean equals = number.getPassword().equals(remberMe);
-                    equals = true;
                     if (equals) {
                         //说明当前的cookie可用而且密码账户都是正确的
-                        request.setAttribute("contacts",  number.getContactMessage().getMessages());
+                        request.setAttribute("messages", number.getMessage().getMessages());
+                        request.setAttribute("contacts", number.getContactMessage().getMessages());
                         session.setAttribute("currentUser", number);
-                        return "detail";
+                        return "detail2";
                     }
 
                 }

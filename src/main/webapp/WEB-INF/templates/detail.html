@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <title th:text="'欢迎您:'+${session.currentUser.getMobileNumber()}">我的生活</title>
+    <title th:text="'欢迎您,'+${session.currentUser.getMobileNumber()}">我的生活</title>
     <meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
     <link rel="shortcut icon" href="/favicon.ico"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -22,11 +22,11 @@
             <h1 class="title" th:text="'欢迎您,'+${session.currentUser.getMobileNumber()}">我的生活</h1>
         </header>
         <nav class="bar bar-tab">
-            <a class="tab-item external active" href="/">
+            <a class="tab-item external active" href="messages">
                 <span class="icon icon-message"></span>
                 <span class="tab-label">短信</span>
             </a>
-            <a class="tab-item" href="/contact">
+            <a class="tab-item" href="contact">
                 <span class="icon icon-phone"></span>
                 <span class="tab-label">通话</span>
             </a>
@@ -41,6 +41,15 @@
                             <p class="color-gray" th:text="${message.messageTime}">发表于 2015/01/15</p>
                             <p th:text="${message.messgaeText}">此处是内容...</p>
                         </div>
+                    </div>
+                    <div class="card-footer" th:switch="${message.type}">
+                        <a th:case="1" href="#" class="link">已收</a>
+                        <a th:case="2" href="#" class="link">已发</a>
+                        <a th:case="3" href="#" class="link">草稿</a>
+                        <a th:case="4" href="#" class="link">待发</a>
+                        <a th:case="5" href="#" class="link">发送失败</a>
+                        <a th:case="6" href="#" class="link">延迟信息</a>
+                        <!--<a href="#" class="link">更多</a>-->
                     </div>
                 </div>
             </div>
