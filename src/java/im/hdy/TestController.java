@@ -14,25 +14,25 @@ import org.springframework.context.annotation.ComponentScan;
 //@ComponentScan("im.hdy.*")
 @SpringBootApplication
 @ComponentScan
-//public class TestController{
-//
-//    public static void main(String[] args) {
-//        SpringApplication.run(TestController.class, args);
-//    }
-//
-//}
-
-//@SpringBootApplication
-//@ComponentScan
-public class TestController extends SpringBootServletInitializer {
+public class TestController{
 
     public static void main(String[] args) {
         SpringApplication.run(TestController.class, args);
     }
 
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(TestController.class);
-    }
 }
+
+//@SpringBootApplication
+//@ComponentScan
+//public class TestController extends SpringBootServletInitializer {
+//
+//    public static void main(String[] args) {
+//        SpringApplication.run(TestController.class, args);
+//    }
+//
+//    @Override
+//    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+//        return application.sources(TestController.class);
+//    }
+//}
 

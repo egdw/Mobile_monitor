@@ -41,11 +41,11 @@ public class LoginController {
                 session.setAttribute("currentUser", mobile);
                 if(remberMe){
                     Cookie cookie = new Cookie("remberMe",md5);
-                    cookie.setMaxAge(60 * 60 * 24 * 5);// 设置为五天
+                    cookie.setMaxAge(60 * 60 * 24 * 30);// 设置为三十天
                     cookie.setPath("/");
                     response.addCookie(cookie);
                     Cookie cookie2 = new Cookie("remberMeU", username);
-                    cookie2.setMaxAge(60 * 60 * 24 * 5);// 设置为五天
+                    cookie2.setMaxAge(60 * 60 * 24 * 30);// 设置为三十天
                     cookie2.setPath("/");
                     response.addCookie(cookie2);
                 }
