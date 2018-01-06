@@ -1,5 +1,7 @@
 package im.hdy.controller;
 
+import im.hdy.entity.ContactMessageDetail;
+import im.hdy.entity.MessageDetail;
 import im.hdy.entity.Mobile;
 import im.hdy.reposity.MobileReposity;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.LinkedList;
 
 /**
  * Created by hdy on 2017/9/5.
@@ -75,8 +78,16 @@ public class ViewController {
             //说明是已经登录的用户了
             Mobile mobile = (Mobile) session.getAttribute("currentUser");
             Mobile number = reposity.findMobileByMobileNumber(mobile.getMobileNumber());
-            request.setAttribute("messages", number.getMessage().getMessages());
-            request.setAttribute("contacts", number.getContactMessage().getMessages());
+            LinkedList<MessageDetail> messages = number.getMessage().getMessages();
+            if(messages == null){
+                messages = new LinkedList<>();
+            }
+            LinkedList<ContactMessageDetail> messages1 = number.getContactMessage().getMessages();
+            if(messages1 == null){
+                messages1 = new LinkedList<>();
+            }
+            request.setAttribute("messages", messages);
+            request.setAttribute("contacts", messages1);
             return "detail";
         }
         if (cookies != null) {

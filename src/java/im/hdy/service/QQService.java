@@ -143,45 +143,45 @@ public class QQService {
     public void initQQClient() {
         LOGGER.info("开始初始化小薇");
 
-        xiaoV = new SmartQQClient(new MessageCallback() {
-            @Override
-            public void onMessage(final Message message) {
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(500 + RandomUtils.nextInt(1000));
-
-                        final String content = message.getContent();
-                        final String key = XiaoVs.getString("qq.bot.key");
-                        if (!content.startsWith(key)) { // 不是管理命令，只是普通的私聊
-                            // 让小薇进行自我介绍
-                            xiaoV.sendMessageToFriend(message.getUserId(), XIAO_V_INTRO);
-                            System.out.println(message.getUserId());
-                            return;
-                        }
-
-                        final String msg = StringUtils.substringAfter(content, key);
-                        LOGGER.info("Received admin message: " + msg);
-                        sendToPushQQGroups(msg);
-                    } catch (final Exception e) {
-                        LOGGER.log(Level.ERROR, "XiaoV on group message error", e);
-                    }
-                }).start();
-            }
-
-            @Override
-            public void onGroupMessage(final GroupMessage message) {
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(500 + RandomUtils.nextInt(1000));
-
-                        onQQGroupMessage(message);
-                    } catch (final Exception e) {
-                        LOGGER.log(Level.ERROR, "XiaoV on group message error", e);
-                    }
-                }).start();
-            }
-
-        });
+//        xiaoV = new SmartQQClient(new MessageCallback() {
+//            @Override
+//            public void onMessage(final Message message) {
+//                new Thread(() -> {
+//                    try {
+//                        Thread.sleep(500 + RandomUtils.nextInt(1000));
+//
+//                        final String content = message.getContent();
+//                        final String key = XiaoVs.getString("qq.bot.key");
+//                        if (!content.startsWith(key)) { // 不是管理命令，只是普通的私聊
+//                            // 让小薇进行自我介绍
+//                            xiaoV.sendMessageToFriend(message.getUserId(), XIAO_V_INTRO);
+//                            System.out.println(message.getUserId());
+//                            return;
+//                        }
+//
+//                        final String msg = StringUtils.substringAfter(content, key);
+//                        LOGGER.info("Received admin message: " + msg);
+//                        sendToPushQQGroups(msg);
+//                    } catch (final Exception e) {
+//                        LOGGER.log(Level.ERROR, "XiaoV on group message error", e);
+//                    }
+//                }).start();
+//            }
+//
+//            @Override
+//            public void onGroupMessage(final GroupMessage message) {
+//                new Thread(() -> {
+//                    try {
+//                        Thread.sleep(500 + RandomUtils.nextInt(1000));
+//
+//                        onQQGroupMessage(message);
+//                    } catch (final Exception e) {
+//                        LOGGER.log(Level.ERROR, "XiaoV on group message error", e);
+//                    }
+//                }).start();
+//            }
+//
+//        });
 
         reloadGroups();
         reloadDiscusses();
@@ -326,35 +326,12 @@ public class QQService {
         }
 
         if (null == group) {
-            LOGGER.log(Level.ERROR, "Group list error [groupId=" + groupId + "], 请先参考项目主页 FAQ 解决"
-                    + "（https://github.com/b3log/xiaov#报错-group-list-error-groupidxxxx-please-report-this-bug-to-developer-怎么破），"
-                    + "如果还有问题，请到论坛讨论帖中进行反馈（https://hacpai.com/article/1467011936362）");
 
             return;
         }
 
         LOGGER.info("Pushing [msg=" + msg + "] to QQ qun [" + group.getName() + "]");
         xiaoV.sendMessageToGroup(groupId, msg);
-    }
-
-    private void sendMessageToDiscuss(final Long discussId, final String msg) {
-        Discuss discuss = QQ_DISCUSSES.get(discussId);
-        if (null == discuss) {
-            reloadDiscusses();
-
-            discuss = QQ_DISCUSSES.get(discussId);
-        }
-
-        if (null == discuss) {
-            LOGGER.log(Level.ERROR, "Discuss list error [discussId=" + discussId + "], 请先参考项目主页 FAQ 解决"
-                    + "（https://github.com/b3log/xiaov#报错-group-list-error-groupidxxxx-please-report-this-bug-to-developer-怎么破），"
-                    + "如果还有问题，请到论坛讨论帖中进行反馈（https://hacpai.com/article/1467011936362）");
-
-            return;
-        }
-
-        LOGGER.info("Pushing [msg=" + msg + "] to QQ discuss [" + discuss.getName() + "]");
-        xiaoV.sendMessageToDiscuss(discussId, msg);
     }
 
     private void onQQGroupMessage(final GroupMessage message) {

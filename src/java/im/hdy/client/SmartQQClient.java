@@ -13,6 +13,7 @@ import net.dongliu.requests.Session;
 import net.dongliu.requests.exception.RequestException;
 import net.dongliu.requests.struct.Cookie;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.Closeable;
 import java.io.File;
@@ -28,6 +29,7 @@ import java.util.*;
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @date 2015/12/18.
  */
+@Component
 public class SmartQQClient implements Closeable {
 
     //日志
@@ -64,10 +66,25 @@ public class SmartQQClient implements Closeable {
     private volatile boolean pollStarted;
 
 
-    public SmartQQClient(final MessageCallback callback) {
+    public SmartQQClient() {
         this.client = Client.pooled().maxPerRoute(5).maxTotal(10).build();
         this.session = client.session();
-        login();
+        //获取验证码
+//        getQRCode();
+    }
+
+    /**
+     * 登录
+     */
+    public void login(String url, final MessageCallback callback) {
+//        getQRCode();
+        getPtwebqq(url);
+        getVfwebqq();
+        getUinAndPsessionid();
+        getFriendStatus(); //修复Api返回码[103]的问题
+        //登录成功欢迎语
+        UserInfo userInfo = getAccountInfo();
+        LOGGER.info(userInfo.getNick() + "，欢迎！");
         if (callback != null) {
             this.pollStarted = true;
             new Thread(new Runnable() {
@@ -93,29 +110,16 @@ public class SmartQQClient implements Closeable {
         }
     }
 
-    /**
-     * 登录
-     */
-    private void login() {
-        getQRCode();
-        String url = verifyQRCode();
-        getPtwebqq(url);
-        getVfwebqq();
-        getUinAndPsessionid();
-        getFriendStatus(); //修复Api返回码[103]的问题
-        //登录成功欢迎语
-        UserInfo userInfo = getAccountInfo();
-        LOGGER.info(userInfo.getNick() + "，欢迎！");
-    }
-
     //登录流程1：获取二维码
-    private void getQRCode() {
+    public Response getQRCode() {
         LOGGER.debug("开始获取二维码");
 
         //本地存储二维码图片
         String filePath;
         try {
-            filePath = new File("qrcode.png").getCanonicalPath();
+            String webappRoot = this.getClass().getResource("/").getPath().replaceFirst("/", "").replaceAll("WEB-INF/classes/", "") + "pic/qrcode.png";
+            new File(webappRoot).getParentFile().mkdirs();
+            filePath = new File(webappRoot).getCanonicalPath();
         } catch (IOException e) {
             throw new IllegalStateException("二维码保存失败");
         }
@@ -129,6 +133,7 @@ public class SmartQQClient implements Closeable {
             }
         }
         LOGGER.info("二维码已保存在 " + filePath + " 文件中，请打开手机QQ并扫描二维码");
+        return response;
     }
 
     //用于生成ptqrtoken的哈希函数
@@ -140,7 +145,7 @@ public class SmartQQClient implements Closeable {
     }
 
     //登录流程2：校验二维码
-    private String verifyQRCode() {
+    public String verifyQRCode() {
         LOGGER.debug("等待扫描二维码");
 
         //阻塞直到确认二维码认证成功
@@ -246,8 +251,6 @@ public class SmartQQClient implements Closeable {
                 callback.onMessage(new Message(message.getJSONObject("value")));
             } else if ("group_message".equals(type)) {
                 callback.onGroupMessage(new GroupMessage(message.getJSONObject("value")));
-            } else if ("discu_message".equals(type)) {
-                callback.onDiscussMessage(new DiscussMessage(message.getJSONObject("value")));
             }
         }
     }
@@ -273,34 +276,13 @@ public class SmartQQClient implements Closeable {
         checkSendMsgResult(response);
     }
 
-    /**
-     * 发送讨论组消息
-     *
-     * @param discussId 讨论组id
-     * @param msg       消息内容
-     */
-    public void sendMessageToDiscuss(long discussId, String msg) {
-        LOGGER.debug("开始发送讨论组消息");
-
-        JSONObject r = new JSONObject();
-        r.put("did", discussId);
-        r.put("content", JSON.toJSONString(Arrays.asList(msg, Arrays.asList("font", Font.DEFAULT_FONT))));  //注意这里虽然格式是Json，但是实际是String
-        r.put("face", 573);
-        r.put("clientid", Client_ID);
-        r.put("msg_id", MESSAGE_ID++);
-        r.put("psessionid", psessionid);
-
-        Response<String> response = postWithRetry(ApiURL.SEND_MESSAGE_TO_DISCUSS, r);
-        checkSendMsgResult(response);
-    }
 
     /**
      * 发送消息
-     *
-     * @param friendId 好友id
+     *  @param friendId 好友id
      * @param msg      消息内容
      */
-    public void sendMessageToFriend(long friendId, String msg) {
+    public boolean sendMessageToFriend(long friendId, String msg) {
         LOGGER.debug("开始发送消息");
 
         JSONObject r = new JSONObject();
@@ -312,7 +294,8 @@ public class SmartQQClient implements Closeable {
         r.put("psessionid", psessionid);
 
         Response<String> response = postWithRetry(ApiURL.SEND_MESSAGE_TO_FRIEND, r);
-        checkSendMsgResult(response);
+        boolean checkSendMsgResult = checkSendMsgResult(response);
+        return checkSendMsgResult;
     }
 
     /**
@@ -575,35 +558,6 @@ public class SmartQQClient implements Closeable {
         return groupInfo;
     }
 
-    /**
-     * 获得讨论组的详细信息
-     *
-     * @param discussId 讨论组id
-     * @return
-     */
-    public DiscussInfo getDiscussInfo(long discussId) {
-        LOGGER.debug("开始获取讨论组资料");
-
-        Response<String> response = get(ApiURL.GET_DISCUSS_INFO, discussId, vfwebqq, psessionid);
-        JSONObject result = getJsonObjectResult(response);
-        DiscussInfo discussInfo = result.getObject("info", DiscussInfo.class);
-        //获得讨论组成员信息
-        Map<Long, DiscussUser> discussUserMap = new HashMap<>();
-        JSONArray minfo = result.getJSONArray("mem_info");
-        for (int i = 0; minfo != null && i < minfo.size(); i++) {
-            DiscussUser discussUser = minfo.getObject(i, DiscussUser.class);
-            discussUserMap.put(discussUser.getUin(), discussUser);
-            discussInfo.addUser(discussUser);
-        }
-        JSONArray stats = result.getJSONArray("mem_status");
-        for (int i = 0; stats != null && i < stats.size(); i++) {
-            JSONObject item = stats.getJSONObject(i);
-            DiscussUser discussUser = discussUserMap.get(item.getLongValue("uin"));
-            discussUser.setClientType(item.getIntValue("client_type"));
-            discussUser.setStatus(item.getString("status"));
-        }
-        return discussInfo;
-    }
 
     //发送get请求
     private Response<String> get(ApiURL url, Object... params) {
@@ -647,16 +601,19 @@ public class SmartQQClient implements Closeable {
     }
 
     //检查消息是否发送成功
-    private static void checkSendMsgResult(Response<String> response) {
+    private static boolean checkSendMsgResult(Response<String> response) {
         if (response.getStatusCode() != 200) {
             LOGGER.error(String.format("发送失败，Http返回码[%d]", response.getStatusCode()));
+            return false;
         }
         JSONObject json = JSON.parseObject(response.getBody());
         Integer errCode = json.getInteger("retcode");
         if (errCode != null && errCode == 0) {
             LOGGER.debug("发送成功");
+            return true;
         } else {
             LOGGER.error(String.format("发送失败，Api返回码[%d]", json.getInteger("retcode")));
+            return false;
         }
     }
 

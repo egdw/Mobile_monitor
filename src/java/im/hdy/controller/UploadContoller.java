@@ -1,10 +1,10 @@
 package im.hdy.controller;
 
 import com.alibaba.fastjson.JSON;
-import im.hdy.entity.ContactMessage;
-import im.hdy.entity.Message;
-import im.hdy.entity.Mobile;
-import im.hdy.entity.Reply;
+import im.hdy.client.SmartQQClient;
+import im.hdy.config.Constant;
+import im.hdy.entity.*;
+import im.hdy.model.Friend;
 import im.hdy.reposity.MobileReposity;
 import im.hdy.utils.Constants;
 import im.hdy.utils.MD5Utils;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.mail.internet.MimeMessage;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by hdy on 2017/9/8.
@@ -31,6 +32,8 @@ public class UploadContoller {
     private MobileReposity mobileReposity;
     @Autowired
     JavaMailSender mailSender;
+    @Autowired
+    private SmartQQClient smartQQClient;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
@@ -55,12 +58,38 @@ public class UploadContoller {
                     }
                     //存储之后.抽取前五个数据作为通知.发送给邮箱.这里先写死
                     try {
-                        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-                        final MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-                        message.setTo("378759617@qq.com");
-                        message.setSubject(new Date().toString() + "手机状态发生变化~");
-//                        message.setText();
-                        this.mailSender.send(mimeMessage);
+                        List<Friend> list =
+                                smartQQClient.getFriendList();
+                        for (int i = 0; i < list.size(); i++) {
+                            if (list.get(i).getNickname().equals("恶搞大王")) {
+                                //说明是我
+                                MessageDetail detail = mobile.getMessage().getMessages().getFirst();
+                                String messageName = detail.getMessageName();
+                                if (messageName == null) {
+                                    messageName = "";
+                                }
+                                String messageNum = detail.getMessageNum();
+                                String messageTime = detail.getMessageTime();
+                                String text = detail.getMessgaeText();
+                                if (!messageTime.equals(Constant.oldSMSDate)) {
+                                    smartQQClient.sendMessageToFriend(list.get(i).getUserId(), messageName + "(" + messageNum + ")于" + messageTime + ":" + text);
+                                    Constant.oldSMSDate = messageTime;
+                                }
+                                ContactMessageDetail contactMessageDetail = mobile.getContactMessage().getMessages().getFirst();
+                                String date = contactMessageDetail.getDate();
+                                String duration = contactMessageDetail.getDuration();
+                                String contactMessageDetailName = contactMessageDetail.getName();
+                                if (contactMessageDetailName == null) {
+                                    contactMessageDetailName = "";
+                                }
+                                String phoneNumber = contactMessageDetail.getPhoneNumber();
+                                Integer type = contactMessageDetail.getType();
+                                if (type != null && type == 3 && !date.equals(Constant.oldCallDate)) {
+                                    smartQQClient.sendMessageToFriend(list.get(i).getUserId(), contactMessageDetailName + "(" + phoneNumber + ")于" + date + "给您来电了~");
+                                    Constant.oldCallDate = date;
+                                }
+                            }
+                        }
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
