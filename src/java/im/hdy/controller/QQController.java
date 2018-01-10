@@ -4,13 +4,12 @@ import im.hdy.callback.MessageCallback;
 import im.hdy.client.SmartQQClient;
 import im.hdy.model.GroupMessage;
 import im.hdy.model.Message;
-import org.apache.catalina.core.ApplicationContext;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.crypto.Cipher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
@@ -27,7 +26,8 @@ public class QQController {
     private SmartQQClient smartQQClient;
 
     @RequestMapping("/login")
-    public void loginQQ(final HttpServletRequest req, final HttpServletResponse resp) {
+    @ResponseBody
+    public String loginQQ(final HttpServletRequest req, final HttpServletResponse resp) {
         System.out.println("执行");
         smartQQClient.getQRCode();
         String webappRoot = this.getClass().getResource("/").getPath().replaceFirst("/", "").replaceAll("WEB-INF/classes/", "") + "pic/qrcode.png";
@@ -58,5 +58,6 @@ public class QQController {
         } finally {
             IOUtils.closeQuietly(output);
         }
+        return "登录成功~";
     }
 }

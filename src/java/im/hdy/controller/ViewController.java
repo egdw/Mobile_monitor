@@ -29,7 +29,7 @@ public class ViewController {
     private MobileReposity reposity;
 
     @RequestMapping(method = RequestMethod.GET)
-    public String index(HttpServletRequest request, HttpSession session){
+    public String index(HttpServletRequest request, HttpSession session) {
         Cookie[] cookies =
                 request.getCookies();
         if (session.getAttribute("currentUser") != null) {
@@ -57,8 +57,12 @@ public class ViewController {
                     boolean equals = number.getPassword().equals(remberMe);
                     if (equals) {
                         //说明当前的cookie可用而且密码账户都是正确的
-                        request.setAttribute("messages", number.getMessage().getMessages());
-                        request.setAttribute("contacts", number.getContactMessage().getMessages());
+                        if (number.getMessage() != null && number.getMessage().getMessages() != null) {
+                            request.setAttribute("messages", number.getMessage().getMessages());
+                        }
+                        if (number.getContactMessage() != null && number.getContactMessage().getMessages() != null) {
+                            request.setAttribute("contacts", number.getContactMessage().getMessages());
+                        }
                         session.setAttribute("currentUser", number);
                         return "detail";
                     }
@@ -78,12 +82,18 @@ public class ViewController {
             //说明是已经登录的用户了
             Mobile mobile = (Mobile) session.getAttribute("currentUser");
             Mobile number = reposity.findMobileByMobileNumber(mobile.getMobileNumber());
-            LinkedList<MessageDetail> messages = number.getMessage().getMessages();
-            if(messages == null){
+            LinkedList<MessageDetail> messages = null;
+            if (number.getMessage() != null) {
+                messages = number.getMessage().getMessages();
+            }
+            if (messages == null) {
                 messages = new LinkedList<>();
             }
-            LinkedList<ContactMessageDetail> messages1 = number.getContactMessage().getMessages();
-            if(messages1 == null){
+            LinkedList<ContactMessageDetail> messages1 = null;
+            if (number.getContactMessage() != null) {
+                messages1 = number.getContactMessage().getMessages();
+            }
+            if (messages1 == null) {
                 messages1 = new LinkedList<>();
             }
             request.setAttribute("messages", messages);
@@ -107,8 +117,12 @@ public class ViewController {
                     boolean equals = number.getPassword().equals(remberMe);
                     if (equals) {
                         //说明当前的cookie可用而且密码账户都是正确的
-                        request.setAttribute("messages", number.getMessage().getMessages());
-                        request.setAttribute("contacts", number.getContactMessage().getMessages());
+                        if (number.getMessage() != null && number.getMessage().getMessages() != null) {
+                            request.setAttribute("messages", number.getMessage().getMessages());
+                        }
+                        if (number.getContactMessage() != null && number.getContactMessage().getMessages() != null) {
+                            request.setAttribute("contacts", number.getContactMessage().getMessages());
+                        }
                         session.setAttribute("currentUser", number);
                         return "detail";
                     }
@@ -127,8 +141,14 @@ public class ViewController {
             //说明是已经登录的用户了
             Mobile mobile = (Mobile) session.getAttribute("currentUser");
             Mobile number = reposity.findMobileByMobileNumber(mobile.getMobileNumber());
-            request.setAttribute("messages", number.getMessage().getMessages());
-            request.setAttribute("contacts", number.getContactMessage().getMessages());
+            if (number.getMessage() != null && number.getMessage().getMessages() != null) {
+                request.setAttribute("messages", number.getMessage().getMessages());
+            }
+            if (number.getContactMessage() != null && number.getContactMessage().getMessages() != null) {
+                request.setAttribute("contacts", number.getContactMessage().getMessages());
+            }
+//            request.setAttribute("messages", number.getMessage().getMessages());
+//            request.setAttribute("contacts", number.getContactMessage().getMessages());
             return "detail2";
         }
         if (cookies != null) {
@@ -148,8 +168,12 @@ public class ViewController {
                     boolean equals = number.getPassword().equals(remberMe);
                     if (equals) {
                         //说明当前的cookie可用而且密码账户都是正确的
-                        request.setAttribute("messages", number.getMessage().getMessages());
-                        request.setAttribute("contacts", number.getContactMessage().getMessages());
+                        if (number.getMessage() != null && number.getMessage().getMessages() != null) {
+                            request.setAttribute("messages", number.getMessage().getMessages());
+                        }
+                        if (number.getContactMessage() != null && number.getContactMessage().getMessages() != null) {
+                            request.setAttribute("contacts", number.getContactMessage().getMessages());
+                        }
                         session.setAttribute("currentUser", number);
                         return "detail2";
                     }
